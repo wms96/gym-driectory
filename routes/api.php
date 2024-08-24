@@ -53,6 +53,7 @@ Route::post('/login', [AuthController::class, 'login']);
     Route::post('coaches/{coach}/images', [CoachController::class, 'addImages']);
     Route::delete('coach-images/{id}', [CoachController::class, 'deleteImage']);
     Route::get('coaches/search', [CoachController::class, 'search']);
+Route::post('coaches/bulk', [CoachController::class, 'bulkStore']);
 
     // Facility Routes
     Route::apiResource('facilities', FacilityController::class);
