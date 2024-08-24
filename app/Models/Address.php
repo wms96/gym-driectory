@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,12 +9,12 @@ class Address extends Model
     use HasFactory;
 
     protected $fillable = [
-        'gym_id', 'street', 'city', 'state', 'country',
+        'addressable_type', 'addressable_id', 'street', 'city', 'state', 'country',
         'postal_code', 'latitude', 'longitude',
     ];
 
-    public function gym()
+    public function addressable()
     {
-        return $this->belongsTo(Gym::class);
+        return $this->morphTo();
     }
 }

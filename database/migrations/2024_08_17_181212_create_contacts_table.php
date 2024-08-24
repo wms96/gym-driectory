@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('contacts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gym_id')->constrained()->onDelete('cascade');
+            $table->morphs('contactable');
             $table->string('type');
             $table->string('value');
             $table->timestamps();

@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+
+namespace App\Models;
+
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,11 +13,11 @@ class Subscription extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['gym_id', 'name', 'description', 'price', 'duration_days'];
+    protected $fillable = ['name', 'description', 'price', 'duration_days', 'subscribable_id', 'subscribable_type'];
 
-    public function gym()
+    public function subscribable()
     {
-        return $this->belongsTo(Gym::class);
+        return $this->morphTo();
     }
 
     public function facilities()

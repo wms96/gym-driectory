@@ -7,13 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'rating',
+        'comment',
+        'member_id',
+        'reviewable_id',
+        'reviewable_type',
+    ];
 
-    protected $fillable = ['gym_id', 'member_id', 'rating', 'comment'];
-
-    public function gym()
+    public function reviewable()
     {
-        return $this->belongsTo(Gym::class);
+        return $this->morphTo();
     }
 
     public function member()

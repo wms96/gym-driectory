@@ -18,18 +18,38 @@ class CoachController extends Controller
         return response()->json($coaches);
     }
 
+    public function show(Coach $coach)
+    {
+        return response()->json($coach->load(['gym', 'images']));
+    }
     public function store(Request $request)
     {
         $request->validate([
-            'gym_id' => 'required',
+            'gym_id' => 'nullable|exists:gyms,id',
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_freelancer' => 'boolean',
+            'preferred_gyms' => 'nullable|array',
+            'price_range' => 'nullable|string',
             'metadata' => 'nullable|array',
             'specialization' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'addresses' => 'nullable|array',
+            'addresses.*.street' => 'required|string',
+            'addresses.*.city' => 'required|string',
+            'addresses.*.state' => 'required|string',
+            'addresses.*.country' => 'required|string',
+            'addresses.*.postal_code' => 'required|string',
+            'addresses.*.latitude' => 'nullable|numeric',
+            'addresses.*.longitude' => 'nullable|numeric',
         ]);
 
         $coach = Coach::create([
             'name' => $request->name,
+            'description' => $request->description,
+            'is_freelancer' => $request->is_freelancer,
+            'preferred_gyms' => $request->preferred_gyms,
+            'price_range' => $request->price_range,
             'metadata' => $request->metadata,
             'gym_id' => $request->gym_id,
             'specialization' => $request->specialization,
@@ -46,26 +66,43 @@ class CoachController extends Controller
             }
         }
 
-        return response()->json($coach->load('images'), 201);
-    }
+        if ($request->has('addresses')) {
+            foreach ($request->addresses as $address) {
+                $coach->addresses()->create($address);
+            }
+        }
 
-    public function show(Coach $coach)
-    {
-        return response()->json($coach->load(['gym', 'images']));
+        return response()->json($coach->load('images', 'addresses'), 201);
     }
 
     public function update(Request $request, Coach $coach)
     {
         $request->validate([
-            'gym_id' => 'required',
+            'gym_id' => 'nullable|exists:gyms,id',
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_freelancer' => 'boolean',
+            'preferred_gyms' => 'nullable|array',
+            'price_range' => 'nullable|string',
             'metadata' => 'nullable|array',
             'specialization' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'addresses' => 'nullable|array',
+            'addresses.*.street' => 'required|string',
+            'addresses.*.city' => 'required|string',
+            'addresses.*.state' => 'required|string',
+            'addresses.*.country' => 'required|string',
+            'addresses.*.postal_code' => 'required|string',
+            'addresses.*.latitude' => 'nullable|numeric',
+            'addresses.*.longitude' => 'nullable|numeric',
         ]);
 
         $coach->update([
             'name' => $request->name,
+            'description' => $request->description,
+            'is_freelancer' => $request->is_freelancer,
+            'preferred_gyms' => $request->preferred_gyms,
+            'price_range' => $request->price_range,
             'metadata' => $request->metadata,
             'gym_id' => $request->gym_id,
             'specialization' => $request->specialization,
@@ -82,9 +119,15 @@ class CoachController extends Controller
             }
         }
 
-        return response()->json($coach->load('images'));
-    }
+        if ($request->has('addresses')) {
+            $coach->addresses()->delete();
+            foreach ($request->addresses as $address) {
+                $coach->addresses()->create($address);
+            }
+        }
 
+        return response()->json($coach->load('images', 'addresses'));
+    }
     public function search(Request $request)
     {
         $query = Coach::query();

@@ -10,11 +10,13 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gym_id')->constrained()->onDelete('cascade');
-            $table->foreignId('member_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('member_id');
+            $table->morphs('reviewable');
             $table->integer('rating');
             $table->text('comment')->nullable();
             $table->timestamps();
+
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
         });
     }
 

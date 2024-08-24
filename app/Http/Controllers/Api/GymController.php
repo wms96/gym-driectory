@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Gym;
 use App\Models\GymImage;
+use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,7 +13,7 @@ class GymController extends Controller
 {
     public function index()
     {
-        $gyms = Gym::with(['owners', 'images', 'contacts', 'admin', 'classes', 'coaches', 'facilities', 'subscriptions', 'members', 'address', 'branches'])->get();
+        $gyms = Gym::with(['owners', 'images', 'contacts', 'admin', 'classes', 'coaches', 'facilities', 'subscriptions', 'members', 'addresses', 'branches'])->get();
 
         return response()->json($gyms);
     }
@@ -24,6 +25,14 @@ class GymController extends Controller
             'metadata' => 'nullable|array',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'addresses' => 'nullable|array',
+            'addresses.*.street' => 'required|string',
+            'addresses.*.city' => 'required|string',
+            'addresses.*.state' => 'required|string',
+            'addresses.*.country' => 'required|string',
+            'addresses.*.postal_code' => 'required|string',
+            'addresses.*.latitude' => 'nullable|numeric',
+            'addresses.*.longitude' => 'nullable|numeric',
         ]);
 
         $gym = Gym::create([
@@ -42,12 +51,16 @@ class GymController extends Controller
             }
         }
 
-        return response()->json($gym->load('images'), 201);
+        if ($request->has('address')) {
+            $gym->addresses()->create($request->address);
+        }
+
+        return response()->json($gym->load('images', 'addresses'), 201);
     }
 
     public function show(Gym $gym)
     {
-        return response()->json($gym->load(['owners', 'contacts', 'admin', 'classes', 'coaches', 'facilities', 'subscriptions', 'members', 'address', 'branches']));
+        return response()->json($gym->load(['owners', 'contacts', 'admin', 'classes', 'coaches', 'facilities', 'subscriptions', 'members', 'addresses', 'branches']));
     }
 
     public function update(Request $request, Gym $gym)
@@ -57,6 +70,14 @@ class GymController extends Controller
             'metadata' => 'nullable|array',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'addresses' => 'nullable|array',
+            'addresses.*.street' => 'required|string',
+            'addresses.*.city' => 'required|string',
+            'addresses.*.state' => 'required|string',
+            'addresses.*.country' => 'required|string',
+            'addresses.*.postal_code' => 'required|string',
+            'addresses.*.latitude' => 'nullable|numeric',
+            'addresses.*.longitude' => 'nullable|numeric',
         ]);
 
         $gym->update([
@@ -74,8 +95,14 @@ class GymController extends Controller
                 ]);
             }
         }
+        if ($request->has('addresses')) {
+            $gym->addresses()->delete();
+            foreach ($request->addresses as $address) {
+                $gym->addresses()->create($address);
+            }
+        }
 
-        return response()->json($gym->load('images'));
+        return response()->json($gym->load('images', 'addresses'));
     }
 
     public function search(Request $request)
@@ -83,12 +110,12 @@ class GymController extends Controller
         $query = Gym::query();
 
         if ($request->has('name')) {
-            $query->where('name', 'like', '%'.$request->name.'%');
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
         if ($request->has('metadata')) {
             foreach ($request->metadata as $key => $value) {
-                $query->where('metadata->'.$key, $value);
+                $query->where('metadata->' . $key, $value);
             }
         }
 

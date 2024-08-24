@@ -10,10 +10,11 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gym_id')->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->text('description')->nullable();
             $table->decimal('price', 8, 2);
             $table->integer('duration_days');
+            $table->morphs('subscribable'); // This creates subscribable_id and subscribable_type columns
             $table->timestamps();
         });
     }

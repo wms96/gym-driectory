@@ -8,9 +8,6 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('subscriptions', function (Blueprint $table) {
-            $table->text('description')->nullable();
-        });
 
         Schema::create('subscription_facility', function (Blueprint $table) {
             $table->id();

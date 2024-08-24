@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,7 +26,7 @@ class Gym extends Model
 
     public function contacts()
     {
-        return $this->hasMany(Contact::class);
+        return $this->morphMany(Contact::class, 'contactable');
     }
 
     public function admin()
@@ -52,7 +51,7 @@ class Gym extends Model
 
     public function subscriptions()
     {
-        return $this->hasMany(Subscription::class);
+        return $this->morphMany(Subscription::class, 'subscribable');
     }
 
     public function members()
@@ -60,9 +59,9 @@ class Gym extends Model
         return $this->hasMany(Member::class);
     }
 
-    public function address()
+    public function addresses()
     {
-        return $this->hasOne(Address::class);
+        return $this->morphMany(Address::class, 'addressable');
     }
 
     public function branches()
@@ -72,6 +71,18 @@ class Gym extends Model
 
     public function reviews()
     {
-        return $this->hasMany(Review::class);
+        return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    public function averageRating()
+    {
+        return $this->reviews()->avg('rating');
+    }
+
+    public function scopeFilterByRating($query, $rating)
+    {
+        return $query->whereHas('reviews', function($query) use ($rating) {
+            $query->where('rating', $rating);
+        });
     }
 }
